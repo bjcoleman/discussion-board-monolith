@@ -2,3 +2,5 @@ Flask
 gunicorn
 pytest
 pytest-cov
+mysql-connector-python
+python-dotenv

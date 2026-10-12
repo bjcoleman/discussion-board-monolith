@@ -1,14 +1,14 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
-    name="discussion-board",
+    name="discussion_board",
     version="0.1.0",
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    package_dir={"discussion_board": "src"},
+    packages=["discussion_board"],
     python_requires=">=3.12",
     install_requires=[
         "Flask>=3.0.0",
-        "PyMySQL>=1.1.0",
+        "mysql-connector-python>=9.0.0",
         "gunicorn>=21.2.0",
         "python-dotenv>=1.0.0",
     ],

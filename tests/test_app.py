@@ -1,4 +1,4 @@
-from app import create_app
+from discussion_board.app import create_app
 
 
 def test_index():
