@@ -1,18 +1,26 @@
 #!/bin/bash
+set -euo pipefail
 
-REPO_URL="https://github.com/YOUR_GITHUB_USERNAME/discussion-board-monolith.git"
+REPO_URL="https://github.com/cs390f26/discussion-board-monolith.git"
+APP_DIR="/home/ec2-user/discussion-board-monolith"
 
-sudo yum install -y python3.12 git
+# 2. Install required packages
+yum install -y python3.12 git
 
-git clone $REPO_URL
+# 3. Clone directly into /home/ec2-user to match the systemd WorkingDirectory
+git clone "$REPO_URL" "$APP_DIR"
+cd "$APP_DIR"
 
-cd discussion-board-monolith
-
-python3 -m venv .venv
+# 4. Explicitly use python3.12 to create the virtual environment
+python3.12 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -r requirements.txt
 .venv/bin/pip install -e .
 
+# 5. Fix ownership (script runs as root, but service runs as ec2-user)
+chown -R ec2-user:ec2-user "$APP_DIR"
+
+# 6. Install and start the systemd service
 cp deploy/discussion.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now discussion.service
