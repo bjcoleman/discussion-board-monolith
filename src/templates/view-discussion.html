@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>View Discussion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <div class="brand">
+          <p class="page-label">CSCI 390 · Cloud Computing</p>
+
+          <h1>Question about EC2</h1>
+
+          <p class="discussion-meta">
+            Started September 17, 2026 at 12:30 PM
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <section class="discussion-prompt">
+          <h2>Prompt</h2>
+
+          <p>
+            I'm confused about how the EC2 instance fits into the architecture.
+          </p>
+        </section>
+
+        <div class="section-header">
+          <h2>Replies</h2>
+          <span class="section-count">2 replies</span>
+        </div>
+
+        <ul class="discussion-list">
+          <li class="discussion-row discussion-post">
+            <div class="discussion-meta">
+              <strong>Connor</strong>
+              <span>September 17, 2026 at 12:40 PM</span>
+            </div>
+
+            <div class="discussion-main">
+              <p>
+                I think the web server and database both run on the same EC2 instance.
+              </p>
+            </div>
+          </li>
+
+          <li class="discussion-row discussion-post">
+            <div class="discussion-meta">
+              <strong>Aidan</strong>
+              <span>September 17, 2026 at 12:50 PM</span>
+            </div>
+
+            <div class="discussion-main">
+              <p>
+                Yes that's what I was thinking as well.
+              </p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="reply-action">
+          <button class="btn btn-primary" type="button">
+            Reply to discussion
+          </button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
