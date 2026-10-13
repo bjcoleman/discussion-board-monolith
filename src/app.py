@@ -369,11 +369,8 @@ def launch() -> Flask:
     return create_app(storage)
 
 
-if __name__ == "__main__":
-    try:
-        app = launch()
-    except RuntimeError as exc:
-        print(exc, file=sys.stderr)
-        sys.exit(1)
+app = launch()
 
+
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

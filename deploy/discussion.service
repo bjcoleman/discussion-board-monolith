@@ -17,7 +17,7 @@ ExecStartPre=/home/ec2-user/discussion-board-monolith/.venv/bin/python /home/ec2
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
-ExecStart=/home/ec2-user/discussion-board-monolith/.venv/bin/gunicorn --workers 2 --bind 0.0.0.0:80 app:app
+ExecStart=/home/ec2-user/discussion-board-monolith/.venv/bin/gunicorn --workers 2 --bind 0.0.0.0:80 discussion_board.app:app
 
 Restart=on-failure
 RestartSec=5
