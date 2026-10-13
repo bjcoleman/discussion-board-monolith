@@ -1,18 +1,24 @@
 [Unit]
 Description=Discussion Board app (gunicorn)
-After=network-online.target
+After=network-online.target mariadb.service
 Wants=network-online.target
+Requires=mariadb.service
 
 [Service]
 Type=simple
 User=ec2-user
 Group=ec2-user
 WorkingDirectory=/home/ec2-user/discussion-board-monolith
-# EnvironmentFile=/home/ec2-user/discussion-board-monolith/.env
-# Bind to port 80 without running the whole process as root.
+EnvironmentFile=/home/ec2-user/discussion-board-monolith/.env
+
+# Wait for the database before starting the application.
+ExecStartPre=/home/ec2-user/discussion-board-monolith/.venv/bin/python /home/ec2-user/discussion-board-monolith/scripts/wait_for_mysql.py --timeout 60
+
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
 ExecStart=/home/ec2-user/discussion-board-monolith/.venv/bin/gunicorn --workers 2 --bind 0.0.0.0:80 app:app
+
 Restart=on-failure
 RestartSec=5
 
