@@ -17,39 +17,87 @@
     <div class="page">
       <header class="site-header">
         <div class="brand">
+          <!-- 1. BACK BUTTON -->
+          <a href="/" class="btn btn-secondary" style="margin-bottom: 1rem; display: inline-block;">
+            &larr; Back to discussions
+          </a>
           <p class="page-label" id="course-label"></p>
           <h1 id="discussion-title">Loading...</h1>
           <p class="discussion-meta" id="discussion-created"></p>
         </div>
       </header>
-    
+
       <main>
         <section class="discussion-prompt">
           <h2>Prompt</h2>
           <p id="discussion-prompt-text"></p>
         </section>
-    
+
         <div class="section-header">
           <h2>Replies</h2>
           <span class="section-count" id="reply-count">0 replies</span>
         </div>
-    
-        <!-- Empty list to be populated by loadDiscussion() JS -->
+
+        <!-- Replies list -->
         <ul class="discussion-list" id="posts-list"></ul>
-    
-        <div class="reply-action">
-          <button class="btn btn-primary" type="button" id="reply-btn">
-            Reply to discussion
-          </button>
-        </div>
+
+        <!-- 2. IN-PAGE REPLY FORM -->
+        <section class="form-card" style="margin-top: 2rem;">
+          <div class="form-section">
+            <h3>Add a reply</h3>
+
+            <div class="form-field">
+              <label for="author-name">Your Name</label>
+              <input
+                id="author-name"
+                type="text"
+                placeholder="e.g. Alex"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="reply-body">Reply</label>
+              <textarea
+                id="reply-body"
+                rows="4"
+                placeholder="Write your response here..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="submit-reply-btn" class="btn btn-primary" type="button">
+              Post reply
+            </button>
+          </div>
+        </section>
       </main>
     </div>
+
     <script>
-      // Extract discussion_id from URL path (/discussions/<discussion_id>/view)
       const pathParts = window.location.pathname.split('/');
       const discussionId = pathParts[2];
 
-      // Fetch discussion details and replies from GET /discussions/<discussion_id>
+      // 3. DATE/TIME FORMATTER (converts ISO strings into "YYYY-MM-DD at H:MM PM")
+      function formatDate(isoString) {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) return isoString;
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // standard 12-hour format
+
+        return `${year}-${month}-${day} at ${hours}:${minutes} ${ampm}`;
+      }
+
+      // Fetch discussion details and replies from GET /discussions/<id>
       async function loadDiscussion() {
         const res = await fetch(`/discussions/${discussionId}`);
         if (!res.ok) {
@@ -61,7 +109,7 @@
         document.getElementById('course-label').textContent = 
           `${d.course.department} ${d.course.courseNumber} · ${d.course.name}`;
         document.getElementById('discussion-title').textContent = d.title;
-        document.getElementById('discussion-created').textContent = `Started ${d.createdAt || ''}`;
+        document.getElementById('discussion-created').textContent = `Started ${formatDate(d.createdAt)}`;
         document.getElementById('discussion-prompt-text').textContent = d.prompt;
         document.getElementById('reply-count').textContent = `${d.posts.length} replies`;
 
@@ -70,7 +118,7 @@
           <li class="discussion-row discussion-post">
             <div class="discussion-meta">
               <strong>${p.authorName}</strong>
-              <span>${p.createdAt || ''}</span>
+              <span>${formatDate(p.createdAt)}</span>
             </div>
             <div class="discussion-main">
               <p>${p.body}</p>
@@ -79,25 +127,36 @@
         `).join('');
       }
 
-      // Submit new reply to POST /discussions/<discussion_id>/posts
-      document.getElementById('reply-btn').addEventListener('click', async () => {
-        const authorName = prompt("Your Name:");
-        if (!authorName) return;
+      // Submit new reply via in-page form to POST /discussions/<id>/posts
+      document.getElementById('submit-reply-btn').addEventListener('click', async () => {
+        const authorNameInput = document.getElementById('author-name');
+        const replyBodyInput = document.getElementById('reply-body');
 
-        const body = prompt("Your Reply:");
-        if (!body) return;
+        const authorName = authorNameInput.value.trim();
+        const body = replyBodyInput.value.trim();
 
-        const res = await fetch(`/discussions/${discussionId}/posts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ authorName, body })
-        });
+        if (!authorName || !body) {
+          alert('Please enter both your name and a reply.');
+          return;
+        }
 
-        if (res.ok) {
-          loadDiscussion(); // Reload discussion list dynamically
-        } else {
-          const err = await res.json();
-          alert(err.error?.message || 'Failed to submit reply');
+        try {
+          const res = await fetch(`/discussions/${discussionId}/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ authorName, body })
+          });
+
+          if (res.ok) {
+            authorNameInput.value = '';
+            replyBodyInput.value = '';
+            loadDiscussion(); // Reload thread dynamically
+          } else {
+            const err = await res.json();
+            alert(err.error?.message || 'Failed to submit reply');
+          }
+        } catch (err) {
+          alert('Network error submitting reply');
         }
       });
 

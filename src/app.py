@@ -135,8 +135,10 @@ def create_app(storage: DiscussionStorage) -> Flask:
 
     @app.post("/courses")
     def create_course():
-        body = request.get_json(silent=True)
+        if not request.is_json:
+            return _error("BAD_REQUEST", "Content-Type must be application/json", 400)
 
+        body = request.get_json(silent=True)
         if not isinstance(body, dict):
             return _error("BAD_REQUEST", "JSON body required", 400)
 
@@ -154,36 +156,39 @@ def create_app(storage: DiscussionStorage) -> Flask:
 
         if not (
             isinstance(department, str)
-            and 1 <= len(department) <= 10
+            and 1 <= len(department.strip()) <= 10
         ):
             return _error(
                 "BAD_REQUEST",
-                "department must be 1-10 characters",
+                "department must be 1-10 non-whitespace characters",
                 400,
             )
 
         if not (
             isinstance(course_number, str)
-            and 1 <= len(course_number) <= 10
+            and 1 <= len(course_number.strip()) <= 10
         ):
             return _error(
                 "BAD_REQUEST",
-                "courseNumber must be 1-10 characters",
+                "courseNumber must be 1-10 non-whitespace characters",
                 400,
             )
 
-        if not isinstance(name, str) or not 1 <= len(name) <= 100:
+        if not (
+            isinstance(name, str)
+            and 1 <= len(name.strip()) <= 100
+        ):
             return _error(
                 "BAD_REQUEST",
-                "name must be 1-100 characters",
+                "name must be 1-100 non-whitespace characters",
                 400,
             )
 
         try:
             course_id = storage.add_course(
-                department=department,
-                course_number=course_number,
-                name=name,
+                department=department.strip(),
+                course_number=course_number.strip(),
+                name=name.strip(),
             )
         except DatabaseUnavailableError:
             return jsonify({"status": "unavailable"}), 503
@@ -249,15 +254,15 @@ def create_app(storage: DiscussionStorage) -> Flask:
         prompt = body.get("prompt")
 
         if (
-            not isinstance(course_id, int)
-            or isinstance(course_id, bool)
-            or course_id < 1
-        ):
+    not isinstance(course_id, int)
+    or isinstance(course_id, bool)
+    or course_id < 1
+):
             return _error(
-                "BAD_REQUEST",
-                "courseId must be an integer >= 1",
-                400,
-            )
+        "BAD_REQUEST",
+        "courseId must be a positive integer",
+        400,
+    )
 
         if not isinstance(title, str) or not 1 <= len(title) <= 200:
             return _error(
@@ -315,9 +320,10 @@ def create_app(storage: DiscussionStorage) -> Flask:
         author_name = body.get("authorName")
         post_body = body.get("body")
 
+        # Validate string types and ensure values are not just empty whitespace
         if (
             not isinstance(author_name, str)
-            or not 1 <= len(author_name) <= 100
+            or not 1 <= len(author_name.strip()) <= 100
         ):
             return _error(
                 "BAD_REQUEST",
@@ -325,7 +331,7 @@ def create_app(storage: DiscussionStorage) -> Flask:
                 400,
             )
 
-        if not isinstance(post_body, str) or len(post_body) < 1:
+        if not isinstance(post_body, str) or len(post_body.strip()) < 1:
             return _error(
                 "BAD_REQUEST",
                 "body must be a non-empty string",
@@ -335,8 +341,8 @@ def create_app(storage: DiscussionStorage) -> Flask:
         try:
             post_id = storage.add_post(
                 discussion_id=discussion_id,
-                author_name=author_name,
-                body=post_body,
+                author_name=author_name.strip(),
+                body=post_body.strip(),
             )
 
             # add_post returns only the new ID, so retrieve the

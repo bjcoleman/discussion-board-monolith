@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
   </head>
 
   <body>
@@ -32,54 +32,74 @@
       <main>
         <div class="section-header">
           <h2>Discussions</h2>
-          <span class="section-count" id="total-count"></span>
+          <span class="section-count" id="total-count">0 discussions</span>
         </div>
-      
-        <!-- Empty container to be populated by loadDiscussions() JS -->
+
+        <!-- Empty container populated by loadDiscussions() JS -->
         <div id="discussions-container"></div>
       </main>
     </div>
+
     <script>
+      // Date/time formatter (converts ISO strings into "YYYY-MM-DD at H:MM PM")
+      function formatDate(isoString) {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) return isoString;
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 12-hour format
+
+        return `${year}-${month}-${day} at ${hours}:${minutes} ${ampm}`;
+      }
+
       async function loadDiscussions() {
-  const res = await fetch('/discussions');
-  if (!res.ok) return;
-  const { groups } = await res.json();
+        const res = await fetch('/discussions');
+        if (!res.ok) return;
+        const { groups } = await res.json();
 
-  const container = document.getElementById('discussions-container');
-  container.innerHTML = '';
+        const container = document.getElementById('discussions-container');
+        container.innerHTML = '';
 
-  let totalDiscussions = 0;
+        let totalDiscussions = 0;
 
-  groups.forEach(group => {
-    totalDiscussions += group.discussions.length;
-    const courseGroupHtml = `
-      <div class="course-group">
-        <div class="course-heading">
-          <h3>${group.course.department} ${group.course.courseNumber} · ${group.course.name}</h3>
-        </div>
-        <ul class="discussion-list">
-          ${group.discussions.map(d => `
-            <li class="discussion-row">
-              <div class="discussion-main">
-                <h4 class="discussion-title">${d.title}</h4>
-                <p class="discussion-meta">${d.createdAt}</p>
+        groups.forEach(group => {
+          totalDiscussions += group.discussions.length;
+          const courseGroupHtml = `
+            <div class="course-group">
+              <div class="course-heading">
+                <h3>${group.course.department} ${group.course.courseNumber} · ${group.course.name}</h3>
               </div>
-              <div class="discussion-side">
-                <span class="post-count">${d.postCount} posts</span>
-                <a href="/discussions/${d.id}/view" class="btn btn-primary">View discussion</a>
-              </div>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-    `;
-    container.insertAdjacentHTML('beforeend', courseGroupHtml);
-  });
+              <ul class="discussion-list">
+                ${group.discussions.map(d => `
+                  <li class="discussion-row">
+                    <div class="discussion-main">
+                      <h4 class="discussion-title">${d.title}</h4>
+                      <p class="discussion-meta">${formatDate(d.createdAt)}</p>
+                    </div>
+                    <div class="discussion-side">
+                      <span class="post-count">${d.postCount} posts</span>
+                      <a href="/discussions/${d.id}/view" class="btn btn-primary">View discussion</a>
+                    </div>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', courseGroupHtml);
+        });
 
-  document.getElementById('total-count').textContent = `${totalDiscussions} discussions`;
-}
+        document.getElementById('total-count').textContent = `${totalDiscussions} discussions`;
+      }
 
-loadDiscussions();
+      loadDiscussions();
     </script>
   </body>
 </html>
