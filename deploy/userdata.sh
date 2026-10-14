@@ -9,7 +9,7 @@ set -euo pipefail
 # USERNAME. DO NOT CHANGE THE REPOSITORY NAME (discussion-board-monolith).
 ##############################################################################
 ##############################################################################
-REPO_URL="https://github.com/YOUR_GITHUB_USERNAME/discussion-board-monolith.git"
+REPO_URL="https://github.com/bjcoleman/discussion-board-monolith.git"
 
 APP_DIR="/home/ec2-user/discussion-board-monolith"
 DB_NAME="discussion_board"
