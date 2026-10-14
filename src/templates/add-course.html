@@ -64,31 +64,44 @@
           </div>
 
           <div class="form-actions">
-            <a href="/" class="btn btn-secondary">Cancel</a>
-            <button class="btn btn-primary" type="button">
+            <a href="/" class="btn btn-secondary">
+              Cancel
+            </a>
+            <button id="create-course-btn" class="btn btn-primary" type="button">
               Create course
             </button>
           </div>
         </section>
       </main>
     </div>
+
     <script>
-      document.querySelector('.btn-primary').addEventListener('click', async () => {
+      document.getElementById('create-course-btn').addEventListener('click', async () => {
         const department = document.getElementById('department').value.trim();
         const courseNumber = document.getElementById('course-number').value.trim();
         const name = document.getElementById('course-name').value.trim();
-    
-        const response = await fetch('/courses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ department, courseNumber, name })
-        });
-    
-        if (response.ok) {
-          window.location.href = '/'; // Return home on success
-        } else {
-          const data = await response.json();
-          alert(data.error?.message || 'Failed to create course');
+
+        if (!department || !courseNumber || !name) {
+          alert('Please fill out all fields.');
+          return;
+        }
+
+        try {
+          const response = await fetch('/courses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ department, courseNumber, name })
+          });
+
+          if (response.ok) {
+            window.location.href = '/';
+          } else {
+            const data = await response.json();
+            alert(data.error?.message || 'Failed to create course');
+          }
+        } catch (err) {
+          console.error('Fetch error:', err);
+          alert('Network error or server unreachable');
         }
       });
     </script>
