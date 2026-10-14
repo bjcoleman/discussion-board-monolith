@@ -55,7 +55,7 @@ These commands do the following:
 - CREATE USER creates a separate account for your application.
 - GRANT gives that account permissions to use the tables and run your development setup scripts.
 
-Using a separate application user is better than running your Flask app as MySQL's root user.
+Using a separate application user limits the permissions available to the Flask application. MySQL's `root` account has administrative privileges, while `discussion_app` is granted access only to the `discussion_board` database.
 
 Exit the MySQL prompt:
 
