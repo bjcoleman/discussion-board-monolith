@@ -31,13 +31,12 @@ def _format_datetime(value) -> str | None:
 
 def _course_json(course: dict) -> dict:
     """Serialize a course database record."""
+    name = course.get("course_name") if "course_name" in course else course.get("name")
     return {
         "id": course["course_id"],
         "department": course["department"],
         "courseNumber": course["course_number"],
-        "name": course.get("course_name", course["name"])
-        if "course_name" in course
-        else course["name"],
+        "name": name,
     }
 
 
@@ -98,6 +97,17 @@ def create_app(storage: DiscussionStorage) -> Flask:
     @app.get("/")
     def index_page():
         return render_template("index.html")
+    @app.get("/courses/add")
+    def add_course_page():
+        return render_template("add-course.html")
+
+    @app.get("/discussions/add")
+    def add_discussion_page():
+        return render_template("add-discussion.html")
+
+    @app.get("/discussions/<int:discussion_id>/view")
+    def view_discussion_page(discussion_id: int):
+        return render_template("view-discussion.html")
 
     # --- Health Check Endpoint ---
 

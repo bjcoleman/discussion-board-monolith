@@ -24,61 +24,62 @@
         </div>
 
         <div class="header-actions">
-          <button class="btn btn-secondary" type="button">
-            Add course
-          </button>
-          <button class="btn btn-primary" type="button">
-            Add discussion
-          </button>
+          <a href="/courses/add" class="btn btn-secondary">Add course</a>
+          <a href="/discussions/add" class="btn btn-primary">Add discussion</a>
         </div>
       </header>
 
       <main>
         <div class="section-header">
           <h2>Discussions</h2>
-          <span class="section-count">2 discussions</span>
+          <span class="section-count" id="total-count"></span>
         </div>
-
-        <div class="course-group">
-          <div class="course-heading">
-            <h3>CSCI 390 · Cloud Computing</h3>
-          </div>
-
-          <ul class="discussion-list">
-            <li class="discussion-row">
-              <div class="discussion-main">
-                <h4 class="discussion-title">Question about EC2</h4>
-                <p class="discussion-meta">
-                  September 17, 2026 at 12:30 PM
-                </p>
-              </div>
-
-              <div class="discussion-side">
-                <span class="post-count">2 posts</span>
-                <button class="btn btn-primary" type="button">
-                  View discussion
-                </button>
-              </div>
-            </li>
-
-            <li class="discussion-row">
-              <div class="discussion-main">
-                <h4 class="discussion-title">Question about HW01</h4>
-                <p class="discussion-meta">
-                  September 19, 2026 at 10:30 AM
-                </p>
-              </div>
-
-              <div class="discussion-side">
-                <span class="post-count">0 posts</span>
-                <button class="btn btn-primary" type="button">
-                  View discussion
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
+      
+        <!-- Empty container to be populated by loadDiscussions() JS -->
+        <div id="discussions-container"></div>
       </main>
     </div>
+    <script>
+      async function loadDiscussions() {
+  const res = await fetch('/discussions');
+  if (!res.ok) return;
+  const { groups } = await res.json();
+
+  const container = document.getElementById('discussions-container');
+  container.innerHTML = '';
+
+  let totalDiscussions = 0;
+
+  groups.forEach(group => {
+    totalDiscussions += group.discussions.length;
+    const courseGroupHtml = `
+      <div class="course-group">
+        <div class="course-heading">
+          <h3>${group.course.department} ${group.course.courseNumber} · ${group.course.name}</h3>
+        </div>
+        <ul class="discussion-list">
+          ${group.discussions.map(d => `
+            <li class="discussion-row">
+              <div class="discussion-main">
+                <h4 class="discussion-title">${d.title}</h4>
+                <p class="discussion-meta">${d.createdAt}</p>
+              </div>
+              <div class="discussion-side">
+                <span class="post-count">${d.postCount} posts</span>
+                <a href="/discussions/${d.id}/view" class="btn btn-primary">View discussion</a>
+              </div>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', courseGroupHtml);
+  });
+
+  document.getElementById('total-count').textContent = `${totalDiscussions} discussions`;
+}
+
+loadDiscussions();
+    </script>
   </body>
 </html>

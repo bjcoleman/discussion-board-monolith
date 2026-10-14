@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
   </head>
 
   <body>
@@ -60,9 +60,7 @@
           </div>
 
           <div class="form-actions">
-            <button class="btn btn-secondary" type="button">
-              Cancel
-            </button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
             <button class="btn btn-primary" type="button">
               Create discussion
             </button>
@@ -70,5 +68,43 @@
         </section>
       </main>
     </div>
+    <script>
+      // 1. Populate courses dropdown from GET /courses
+      async function loadCourses() {
+        const res = await fetch('/courses');
+        if (res.ok) {
+          const data = await res.json();
+          const select = document.getElementById('course');
+          select.innerHTML = '<option value="">Select a course</option>';
+          data.courses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.department} ${c.courseNumber} · ${c.name}`;
+            select.appendChild(opt);
+          });
+        }
+      }
+      loadCourses();
+    
+      // 2. Submit new discussion to POST /discussions
+      document.querySelector('.btn-primary').addEventListener('click', async () => {
+        const courseId = parseInt(document.getElementById('course').value, 10);
+        const title = document.getElementById('title').value.trim();
+        const prompt = document.getElementById('prompt').value.trim();
+    
+        const response = await fetch('/discussions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ courseId, title, prompt })
+        });
+    
+        if (response.ok) {
+          window.location.href = '/';
+        } else {
+          const data = await response.json();
+          alert(data.error?.message || 'Failed to create discussion');
+        }
+      });
+    </script>
   </body>
 </html>
